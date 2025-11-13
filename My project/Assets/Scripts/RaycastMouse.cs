@@ -6,17 +6,20 @@ public class RaycastMouse : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
 
     private GameObject selectedObject;
-    private GameObject hand;
+    private GameObject placement;
+
+    private bool showcard = false;
+    private Vector3 lastcoordinate;
     void Start()
     {
-        hand = GameObject.Find("Hand");
+        placement = GameObject.Find("Placement");
 
     }
 
  
 
     // Update is called once per frame
-    void LateUpdate()
+    void Update()
     {
         
         
@@ -41,7 +44,7 @@ public class RaycastMouse : MonoBehaviour
             //Debug.Log("Objet touché : " + hit.collider.gameObject.name);
             if(hit.collider.gameObject.name=="carte")
             {
-                if (Mouse.current.leftButton.isPressed)
+                if (Mouse.current.leftButton.isPressed && !showcard)
                 {
                     //hit.collider.gameObject.transform.position = new Vector3(hit.point.x, hit.collider.gameObject.transform.position.y, hit.point.z);
                     selectedObject = hit.collider.gameObject;
@@ -49,7 +52,7 @@ public class RaycastMouse : MonoBehaviour
                 }
                 else
                 {
-                    if(selectedObject != null)
+                    /*if(selectedObject != null)
                     {
                                             
                         if(mousePosition[1] < 170f)
@@ -58,18 +61,32 @@ public class RaycastMouse : MonoBehaviour
                             selectedObject.transform.position = new Vector3(hand.transform.position.x, hand.transform.position.y + 10f, hand.transform.position.z);
                             //selectedObject.transform.SetParent(hand.transform);
                         }
-                    }
+                    }*/
                      selectedObject = null;
+                }
+
+                if(Mouse.current.rightButton.wasPressedThisFrame)
+                {
+                    showcard = !showcard;
+                    if (showcard)
+                    {
+                        lastcoordinate = hit.collider.gameObject.transform.position;
+                        hit.collider.gameObject.transform.position = new Vector3(0f, 101f, 0f);
+                    }
+                    else
+                    {
+                        hit.collider.gameObject.transform.position = lastcoordinate;
+                    }
                 }
             }
 
         }
 
-        if(selectedObject != null)
+        if(selectedObject != null && !showcard)
         {
-           
 
-            if (mousePosition[1] < 170f) { 
+
+            /*if (mousePosition[1] < 170f) { 
                 selectedObject.transform.position = hand.transform.position;
                 selectedObject.transform.position = new Vector3(hand.transform.position.x, hand.transform.position.y + 10f, hand.transform.position.z);
 
@@ -78,9 +95,24 @@ public class RaycastMouse : MonoBehaviour
             {
                 selectedObject.transform.position = new Vector3(hit.point.x, 5, hit.point.z);
 
+            }*/
+
+            float max = 999f;
+            foreach(Transform enfant in placement.transform)
+            {
+                Vector2 xz = new Vector2(enfant.position.x, enfant.position.z);
+                Vector2 mousePositiontest = new Vector2(hit.point.x, hit.point.z);
+
+                float distance = Vector3.Distance(xz, mousePositiontest);
+                if(distance < max)
+                {
+                    max = distance;
+                    selectedObject.transform.position = new Vector3(enfant.position.x, enfant.position.y + 5f, enfant.position.z);
+                }
+
+
             }
-                
-                
+
         }
 
         
